@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install -r dev-requirements.txt
+          pip install pre-commit
+          pip install frappe-bench
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Start bench stack
+        run: docker compose -f docker-compose.yml up -d --build
+      - name: Run pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure
+      - name: Stop bench stack
+        if: always()
+        run: docker compose -f docker-compose.yml down -v
