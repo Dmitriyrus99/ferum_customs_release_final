@@ -1,19 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
 jobs:
-  tests:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install ruff black mypy types-requests pre-commit
+      - name: Run linters and formatters
+        run: pre-commit run --all-files --show-diff-on-failure --exclude pytest
 
-      - name: Build & start stack
-        run: docker compose -f docker-compose.yml up -d --build --wait --wait-timeout 600
-
-      - name: Run pre-commit
-        run: pre-commit run --all-files --show-diff-on-failure
-
-      - name: Run tests (inside backend)
-        run: docker compose exec -T backend pytest  # -T: без TTY
-
-      - name: Stop stack
+  tests:
+    runs-on: ubuntu-latest
+    needs: lint # Запускать тесты только после успешного линтинга
+    steps:
+      - uses: actions/checkout@v3
+      - name: Start bench stack
+        run: docker compose -f docker-compose.yml up -d --build
+      - name: Wait for site setup
+        run: |
+          echo "Waiting for site to be ready..."
+          # Простой способ дождаться готовности - использовать таймаут.
+          # В реальном проекте лучше использовать скрипт, проверяющий доступность сайта.
+          sleep 180
+      - name: Run tests inside container
+        run: |
+          # Выполняем тесты внутри контейнера, где сайт уже создан
+          docker compose exec -T frappe bench --site dev.localhost run-tests --app ferum_customs
+      - name: Stop bench stack
         if: always()
-        run: docker compose down -v
-
+        run: docker compose -f docker-compose.yml down -v
