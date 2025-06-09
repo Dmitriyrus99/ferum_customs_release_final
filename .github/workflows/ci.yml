@@ -21,8 +21,19 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Start bench stack
         run: docker compose -f docker-compose.yml up -d --build
+      - name: Wait for Frappe site
+        run: |
+          for i in {1..120}; do
+            if curl -sSf http://localhost:8000/api/method/ping >/dev/null; then
+              echo "Frappe site is up"
+              break
+            fi
+            sleep 5
+          done
       - name: Run pre-commit
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: SKIP=pytest pre-commit run --all-files --show-diff-on-failure
+      - name: Run tests
+        run: docker compose exec frappe pytest
       - name: Stop bench stack
         if: always()
         run: docker compose -f docker-compose.yml down -v
