@@ -51,7 +51,9 @@ def validate(doc: "ServiceReport", method: str | None = None) -> None:
 
     if not req_status:
         frappe.logger(__name__).error(
-            f"Не удалось получить статус для заявки '{doc.service_request}', связанной с отчетом '{doc.name}'."
+            _("Не удалось получить статус для заявки '{0}', связанной с отчетом '{1}'.").format(
+                doc.service_request, doc.name
+            )
         )
         frappe.throw(
             _(
@@ -88,16 +90,14 @@ def on_submit(doc: "ServiceReport", method: str | None = None) -> None:
     try:
         req: "ServiceRequest" = frappe.get_doc("Service Request", doc.service_request)
 
-        # Обновляем поле со ссылкой на отчет в заявке
         req.set(FIELD_CUSTOM_LINKED_REPORT, doc.name)
 
-        # Дополнительная проверка и установка статуса, если требуется
         if req.status != STATUS_VYPOLNENA:
             req.status = STATUS_VYPOLNENA
             if req.meta.has_field("completed_on") and not req.get("completed_on"):
                 req.completed_on = frappe.utils.now()
 
-        req.save(ignore_permissions=True)  # Сохраняем изменения
+        req.save(ignore_permissions=True)
 
         frappe.msgprint(
             _("Связанная заявка на обслуживание {0} была обновлена.").format(req.name),
@@ -110,12 +110,16 @@ def on_submit(doc: "ServiceReport", method: str | None = None) -> None:
 
     except frappe.DoesNotExistError:
         frappe.logger(__name__).error(
-            f"Заявка на обслуживание '{doc.service_request}', указанная в отчете '{doc.name}', не найдена во время on_submit.",
+            _("Заявка '{0}', указанная в отчете '{1}', не найдена.").format(
+                doc.service_request, doc.name
+            ),
             exc_info=True,
         )
     except Exception as e:
         frappe.logger(__name__).error(
-            f"Ошибка при обновлении связанной заявки '{doc.service_request}' из отчета '{doc.name}': {e}",
+            _("Ошибка при обновлении заявки '{0}' из отчета '{1}': {2}").format(
+                doc.service_request, doc.name, e
+            ),
             exc_info=True,
         )
         frappe.throw(
