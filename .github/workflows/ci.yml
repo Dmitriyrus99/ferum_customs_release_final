@@ -94,7 +94,7 @@ jobs:
           echo "Waiting for Frappe site to become available..."
           timeout=300 # Таймаут 5 минут
           start_time=$(date +%s)
-          # Имя сайта должно соответствовать значению SITE_NAME в docker-compose.yml
+          # Имя хоста и порт должны соответствовать настройкам в docker-compose.yml
           SITE_HOST="http://localhost:8000"
 
           while true; do
@@ -106,7 +106,7 @@ jobs:
               exit 1
             fi
             
-            # Отправляем запрос к стандартному эндпоинту Frappe
+            # Отправляем запрос к стандартному эндпоинту Frappe для проверки доступности
             status_code=$(curl -s -o /dev/null -w "%{http_code}" $SITE_HOST/api/method/ping || echo "000")
             
             if [ "$status_code" -eq 200 ]; then
