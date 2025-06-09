@@ -2,21 +2,21 @@
 """Хуки для DocType *Service Request*."""
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, List
 
 import frappe
 from frappe import _
-from frappe.utils import now
+from frappe.utils import get_link_to_form, now
 
 from ..constants import (
-    STATUS_VYPOLNENA,
-    STATUS_ZAKRYTA,
-    ROLE_PROEKTNYJ_MENEDZHER,
     FIELD_CUSTOM_CUSTOMER,
+    FIELD_CUSTOM_LINKED_REPORT,
     FIELD_CUSTOM_PROJECT,
     FIELD_CUSTOM_SERVICE_OBJECT_LINK,
-    FIELD_CUSTOM_LINKED_REPORT,
-    # STATUS_K_VYPOLNENIYU
+    ROLE_PROEKTNYJ_MENEDZHER,
+    STATUS_VYPOLNENA,
+    STATUS_ZAKRYTA,
 )
 
 if TYPE_CHECKING:
@@ -35,66 +35,42 @@ def validate(doc: "ServiceRequest", method: str | None = None) -> None:
     Проверяем бизнес-правила.
     """
     if doc.status == STATUS_VYPOLNENA and not doc.get(FIELD_CUSTOM_LINKED_REPORT):
-        frappe.throw(
-            _(
-                "Нельзя отметить заявку выполненной без связанного отчёта о выполненных работах (Service Report)."
-            )
-        )
+        frappe.throw(_("Нельзя отметить заявку выполненной без связанного отчёта."))
 
     if doc.status == STATUS_VYPOLNENA and not doc.get("completed_on"):
-        if doc.meta.has_field(
-            "completed_on"
-        ):  # completed_on - стандартное поле, его не меняем
-            doc.completed_on = now()
-        else:
-            frappe.logger(__name__).warning(
-                f"service_request: {doc.name}. Field 'completed_on' is missing in DocType, but validation logic expects it."
-            )
+        doc.completed_on = now()
 
     if doc.get(FIELD_CUSTOM_PROJECT) and not doc.get(FIELD_CUSTOM_CUSTOMER):
-        customer_from_project = frappe.db.get_value(
-            "ServiceProject", doc.get(FIELD_CUSTOM_PROJECT), "customer"
+        customer = frappe.db.get_value(
+            "Service Project", doc.get(FIELD_CUSTOM_PROJECT), "customer"
         )
-        if customer_from_project:
-            setattr(doc, FIELD_CUSTOM_CUSTOMER, customer_from_project)
+        if customer:
+            doc.custom_customer = customer
         else:
-            frappe.throw(
-                _(
-                    "Клиент должен быть указан для заявки на обслуживание, или выбранный проект ({0}) должен иметь связанного клиента."
-                ).format(doc.get(FIELD_CUSTOM_PROJECT))
-            )
+            frappe.throw(_("У выбранного проекта ({0}) отсутствует связанный клиент.").format(doc.get(FIELD_CUSTOM_PROJECT)))
 
     if not doc.get(FIELD_CUSTOM_CUSTOMER) and doc.get(FIELD_CUSTOM_SERVICE_OBJECT_LINK):
-        customer_from_so = frappe.db.get_value(
-            "ServiceObject", doc.get(FIELD_CUSTOM_SERVICE_OBJECT_LINK), "customer"
+        customer = frappe.db.get_value(
+            "Service Object", doc.get(FIELD_CUSTOM_SERVICE_OBJECT_LINK), "customer"
         )
-        if customer_from_so:
-            setattr(doc, FIELD_CUSTOM_CUSTOMER, customer_from_so)
-
-    # if doc.status in [STATUS_V_RABOTE] and not doc.get("custom_assigned_engineer"):
-    #     frappe.throw(_("Необходимо назначить инженера для заявки в статусе '{0}'.").format(doc.status))
+        if customer:
+            doc.custom_customer = customer
 
 
 def on_update_after_submit(doc: "ServiceRequest", method: str | None = None) -> None:
+    """Вызывается после обновления отправленного документа."""
     if doc.status == STATUS_ZAKRYTA:
-        _notify_project_manager(
-            doc
-        )  # Внутренние поля doc (name, subject и т.д.) не меняются
+        _notify_project_manager(doc)
 
 
-def prevent_deletion_with_links(
-    doc: "ServiceRequest", method: str | None = None
-) -> None:
-    if doc.name:
-        linked_reports = frappe.db.exists(
-            "ServiceReport", {"service_request": doc.name}
-        )  # service_request в ServiceReport стандартное, не меняем
-        if linked_reports:
-            frappe.throw(
-                _(
-                    "Нельзя удалить заявку {0}, так как на нее ссылаются один или несколько отчетов о выполненных работах (например, {1})."
-                ).format(doc.name, linked_reports)
+def prevent_deletion_with_links(doc: "ServiceRequest", method: str | None = None) -> None:
+    """Запрещает удаление заявки, если на нее есть ссылки."""
+    if linked_report := frappe.db.exists("Service Report", {"service_request": doc.name}):
+        frappe.throw(
+            _("Нельзя удалить заявку {0}, так как на нее ссылается отчет {1}.").format(
+                doc.name, linked_report
             )
+        )
 
 
 # --------------------------------------------------------------------------- #
@@ -104,35 +80,23 @@ def prevent_deletion_with_links(
 
 @frappe.whitelist()
 def get_engineers_for_object(service_object_name: str) -> List[str]:
-    # Эта функция принимает имя объекта, а не документ service_request, поэтому здесь нет изменений fieldname
+    """Возвращает список инженеров, назначенных на объект обслуживания."""
     if not service_object_name:
         return []
 
-    engineers: List[str] = []
     try:
-        service_object_doc: "FrappeDocument" = frappe.get_doc(
-            "ServiceObject", service_object_name
-        )
-
-        assigned_engineers_table = service_object_doc.get("assigned_engineers")
-        if assigned_engineers_table and isinstance(assigned_engineers_table, list):
-            for entry in assigned_engineers_table:
-                if entry.get("engineer"):
-                    engineers.append(entry.engineer)
-
+        so_doc: "FrappeDocument" = frappe.get_doc("Service Object", service_object_name)
+        engineers_table = so_doc.get("assigned_engineers") or []
+        return list({entry.get("engineer") for entry in engineers_table if entry.get("engineer")})
     except frappe.DoesNotExistError:
-        frappe.logger(__name__).info(
-            f"ServiceObject '{service_object_name}' not found while trying to get assigned engineers."
-        )
+        frappe.logger(__name__).info(f"Объект '{service_object_name}' не найден при поиске инженеров.")
         return []
     except Exception as e:
         frappe.logger(__name__).error(
-            f"Error fetching engineers for ServiceObject '{service_object_name}': {e}",
+            f"Ошибка при получении инженеров для объекта '{service_object_name}': {e}",
             exc_info=True,
         )
         return []
-
-    return list(set(engineers))
 
 
 # --------------------------------------------------------------------------- #
@@ -141,52 +105,41 @@ def get_engineers_for_object(service_object_name: str) -> List[str]:
 
 
 def _notify_project_manager(doc: "ServiceRequest") -> None:
-    """Send closure notification to project managers."""
+    """Отправляет уведомление о закрытии заявки менеджерам проекта."""
     try:
         recipients = frappe.get_all(
             "User",
-            filters={
-                "enabled": 1,
-                "user_type": "System User",
-                "roles.role": ROLE_PROEKTNYJ_MENEDZHER,
-            },
+            filters={"enabled": 1, "roles.role": ROLE_PROEKTNYJ_MENEDZHER},
             pluck="name",
             distinct=True,
         )
 
         if not recipients:
             frappe.logger(__name__).warning(
-                f"No recipients found with role '{ROLE_PROEKTNYJ_MENEDZHER}' for Service Request '{doc.name}' closure notification."
+                f"Получатели с ролью '{ROLE_PROEKTNYJ_MENEDZHER}' не найдены для уведомления о закрытии заявки '{doc.name}'."
             )
             return
 
         subject = _("Заявка на обслуживание {0} закрыта").format(doc.name)
-        # Используем стандартные поля doc.name, doc.subject, doc.status, doc.get(FIELD_CUSTOM_CUSTOMER) (если нужно в тексте)
-        message_body_parts = [
-            _("Заявка на обслуживание {0} была переведена в статус «Закрыта».").format(
-                doc.name
-            )
-        ]
-        if doc.subject:
-            message_body_parts.append(_("Тема: {0}").format(doc.subject))
-        if doc.get(FIELD_CUSTOM_CUSTOMER):
-            message_body_parts.append(
-                _("Клиент: {0}").format(
-                    frappe.get_cached_value(
-                        "Customer", doc.get(FIELD_CUSTOM_CUSTOMER), "customer_name"
-                    )
-                    or doc.get(FIELD_CUSTOM_CUSTOMER)
-                )
-            )
+        customer_name = (
+            frappe.get_cached_value("Customer", doc.custom_customer, "customer_name")
+            if doc.custom_customer
+            else ""
+        )
 
-        message_body = "\n".join(message_body_parts)
-
-        link_to_request = frappe.utils.get_link_to_form("Service Request", doc.name)
-
-        message = "<p>{}</p><p><a href='{}'>{}</a></p>".format(
-            message_body.replace("\n", "<br>"),
-            link_to_request,
-            _("Просмотреть заявку на обслуживание"),
+        message = _(
+            """
+            <p>Заявка на обслуживание <b>{doc_name}</b> была переведена в статус «Закрыта».</p>
+            <p>Тема: {subject}</p>
+            <p>Клиент: {customer}</p>
+            <p><a href="{link}">{link_text}</a></p>
+            """
+        ).format(
+            doc_name=doc.name,
+            subject=doc.subject,
+            customer=customer_name or _("Не указан"),
+            link=get_link_to_form("Service Request", doc.name),
+            link_text=_("Просмотреть заявку"),
         )
 
         frappe.sendmail(
@@ -197,12 +150,8 @@ def _notify_project_manager(doc: "ServiceRequest") -> None:
             reference_name=doc.name,
             now=True,
         )
-        frappe.logger(__name__).info(
-            f"Sent closure notification for service_request '{doc.name}' to project managers."
-        )
-
     except Exception as e:
         frappe.logger(__name__).error(
-            f"Failed to send closure notification for service_request '{doc.name}': {e}",
+            f"Не удалось отправить уведомление о закрытии заявки '{doc.name}': {e}",
             exc_info=True,
         )
