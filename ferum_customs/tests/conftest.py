@@ -22,13 +22,14 @@ def frappe_test_context():
     bench_cmd = shutil.which("bench")
     if bench_cmd is None:
         pytest.skip("bench CLI not available")
+    bench_cmd = ["sudo", bench_cmd]
     bench_env = os.environ.copy()
     bench_env.setdefault("CI", "1")
 
     try:
         subprocess.run(
-            [
-                bench_cmd,
+            bench_cmd
+            + [
                 "drop-site",
                 test_site_name,
                 "--force",
@@ -38,14 +39,10 @@ def frappe_test_context():
         )
         try:
             subprocess.run(
-                [
-                    bench_cmd,
+                bench_cmd
+                + [
                     "new-site",
                     test_site_name,
-                    "--admin-password",
-                    "admin",
-                    "--mariadb-root-password",
-                    os.environ.get("MYSQL_ROOT_PASSWORD", "root"),
                 ],
                 check=True,
                 env=bench_env,
@@ -54,8 +51,8 @@ def frappe_test_context():
             pytest.skip("bench new-site failed")
 
         subprocess.run(
-            [
-                bench_cmd,
+            bench_cmd
+            + [
                 "use",
                 test_site_name,
             ],
@@ -63,8 +60,8 @@ def frappe_test_context():
             env=bench_env,
         )
         subprocess.run(
-            [
-                bench_cmd,
+            bench_cmd
+            + [
                 "install-app",
                 "erpnext",
             ],
@@ -72,8 +69,8 @@ def frappe_test_context():
             env=bench_env,
         )
         subprocess.run(
-            [
-                bench_cmd,
+            bench_cmd
+            + [
                 "install-app",
                 "ferum_customs",
             ],
@@ -90,8 +87,8 @@ def frappe_test_context():
     finally:
         frappe.destroy()
         subprocess.run(
-            [
-                bench_cmd,
+            bench_cmd
+            + [
                 "drop-site",
                 test_site_name,
                 "--force",
