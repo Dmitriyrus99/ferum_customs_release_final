@@ -1,6 +1,6 @@
 {
     "doctype": "DocType",
-    "name": "custom_attachment",
+    "name": "Custom Attachment",
     "module": "Ferum Customs",
     "fields": [
         {
@@ -13,19 +13,19 @@
             "fieldname": "parent_reference_sr",
             "label": "Parent Service Request",
             "fieldtype": "Link",
-            "options": "service_request"
+            "options": "Service Request"
         },
         {
             "fieldname": "parent_reference_srep",
             "label": "Parent Service Report",
             "fieldtype": "Link",
-            "options": "ServiceReport"
+            "options": "Service Report"
         },
         {
             "fieldname": "parent_reference_so",
             "label": "Parent Service Object",
             "fieldtype": "Link",
-            "options": "ServiceObject"
+            "options": "Service Object"
         },
         {
             "fieldname": "attachment_file",

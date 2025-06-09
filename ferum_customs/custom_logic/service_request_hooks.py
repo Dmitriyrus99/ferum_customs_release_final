@@ -1,5 +1,5 @@
 # ferum_customs/ferum_customs/custom_logic/service_request_hooks.py
-"""Хуки для DocType *service_request*."""
+"""Хуки для DocType *Service Request*."""
 
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 def validate(doc: "ServiceRequest", method: str | None = None) -> None:
     """
-    Вызывается Frappe перед сохранением `service_request`.
+    Вызывается Frappe перед сохранением `Service Request`.
     Проверяем бизнес-правила.
     """
     if doc.status == STATUS_VYPOLNENA and not doc.get(FIELD_CUSTOM_LINKED_REPORT):
@@ -181,7 +181,7 @@ def _notify_project_manager(doc: "ServiceRequest") -> None:
 
         message_body = "\n".join(message_body_parts)
 
-        link_to_request = frappe.utils.get_link_to_form("service_request", doc.name)
+        link_to_request = frappe.utils.get_link_to_form("Service Request", doc.name)
 
         message = "<p>{}</p><p><a href='{}'>{}</a></p>".format(
             message_body.replace("\n", "<br>"),
@@ -193,7 +193,7 @@ def _notify_project_manager(doc: "ServiceRequest") -> None:
             recipients=recipients,
             subject=subject,
             message=message,
-            reference_doctype="service_request",
+            reference_doctype="Service Request",
             reference_name=doc.name,
             now=True,
         )

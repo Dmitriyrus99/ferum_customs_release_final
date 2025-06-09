@@ -1,6 +1,6 @@
 {
     "doctype": "DocType",
-    "name": "assigned_engineer_item",
+    "name": "Assigned Engineer Item",
     "module": "Ferum Customs",
     "istable": 1,
     "fields": [

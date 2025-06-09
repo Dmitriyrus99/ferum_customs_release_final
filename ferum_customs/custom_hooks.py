@@ -17,7 +17,7 @@ DOC_EVENTS = {
         "validate": "ferum_customs.custom_logic.payroll_entry_hooks.validate",
         "before_save": "ferum_customs.custom_logic.payroll_entry_hooks.before_save",
     },
-    "CustomAttachment": {
+    "Custom Attachment": {
         "on_trash": "ferum_customs.custom_logic.file_attachment_utils.on_custom_attachment_trash",
     },
 }

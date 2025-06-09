@@ -1,6 +1,6 @@
 {
     "doctype": "DocType",
-    "name": "service_report",
+    "name": "Service Report",
     "module": "Ferum Customs",
     "engine": "InnoDB",
     "track_changes": 1,
@@ -10,7 +10,7 @@
             "fieldname": "service_request",
             "label": "Service Request",
             "fieldtype": "Link",
-            "options": "service_request",
+            "options": "Service Request",
             "reqd": 1,
             "in_list_view": 1
         },

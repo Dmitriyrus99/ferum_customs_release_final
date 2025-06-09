@@ -1,5 +1,5 @@
 # ferum_customs/ferum_customs/custom_logic/service_object_hooks.py
-"""Хуки для DocType *ServiceObject* – оборудование / объект обслуживания."""
+"""Хуки для DocType *Service Object* – оборудование / объект обслуживания."""
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
@@ -8,7 +8,7 @@ import frappe
 from frappe import _  # Для перевода строк
 
 if TYPE_CHECKING:
-    # Замените на актуальный путь к вашему DocType ServiceObject, если он определен.
+    # Замените на актуальный путь к вашему DocType Service Object, если он определен.
     from ..doctype.service_object.service_object import ServiceObject
 
     # from frappe.model.document import Document # Общий тип для документов
@@ -21,7 +21,7 @@ def validate(doc: "ServiceObject", method: str | None = None) -> None:
     Эта проверка является примером бизнес-требования.
 
     Args:
-        doc: Экземпляр документа ServiceObject.
+        doc: Экземпляр документа Service Object.
         method: Имя вызвавшего метода (например, "validate").
 
     Raises:
@@ -36,7 +36,7 @@ def validate(doc: "ServiceObject", method: str | None = None) -> None:
             return
 
         # Формируем фильтры для поиска дубликатов.
-        # Ищем ServiceObject с таким же serial_no, но с другим именем (doc.name).
+        # Ищем Service Object с таким же serial_no, но с другим именем (doc.name).
         # Это гарантирует, что мы не найдем сам текущий документ при его редактировании.
         filters = {
             "serial_no": serial_no_cleaned,
@@ -46,7 +46,7 @@ def validate(doc: "ServiceObject", method: str | None = None) -> None:
         }
 
         # frappe.db.exists возвращает имя существующего документа или None
-        existing_doc_name = frappe.db.exists("ServiceObject", filters)
+        existing_doc_name = frappe.db.exists("Service Object", filters)
 
         if existing_doc_name:
             # Если дубликат найден, выбрасываем исключение с переводимым сообщением.

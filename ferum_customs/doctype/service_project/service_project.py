@@ -1,6 +1,6 @@
 # ferum_customs/ferum_customs/doctype/service_project/service_project.py
 """
-Python-контроллер для DocType "ServiceProject".
+Python-контроллер для DocType "Service Project".
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from frappe import _
 
 class ServiceProject(Document):  # Имя класса в CamelCase
     """
-    Класс документа ServiceProject.
+    Класс документа Service Project.
     """
 
     def validate(self) -> None:

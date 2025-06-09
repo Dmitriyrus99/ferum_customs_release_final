@@ -1,8 +1,8 @@
 [
   {
     "doctype": "DocPerm",
-    "name": "service_request-Проектный менеджер-0",
-    "parent": "service_request",
+    "name": "Service Request-Проектный менеджер-0",
+    "parent": "Service Request",
     "parenttype": "DocType",
     "role": "Проектный менеджер",
     "permlevel": 0,
@@ -22,8 +22,8 @@
   },
   {
     "doctype": "DocPerm",
-    "name": "service_request-Инженер-0",
-    "parent": "service_request",
+    "name": "Service Request-Инженер-0",
+    "parent": "Service Request",
     "parenttype": "DocType",
     "role": "Инженер",
     "permlevel": 0,
@@ -43,8 +43,8 @@
   },
   {
     "doctype": "DocPerm",
-    "name": "service_request-Заказчик-0",
-    "parent": "service_request",
+    "name": "Service Request-Заказчик-0",
+    "parent": "Service Request",
     "parenttype": "DocType",
     "role": "Заказчик",
     "permlevel": 0,
@@ -64,8 +64,8 @@
   },
   {
     "doctype": "DocPerm",
-    "name": "service_request-Customer-0",
-    "parent": "service_request",
+    "name": "Service Request-Customer-0",
+    "parent": "Service Request",
     "parenttype": "DocType",
     "role": "Customer",
     "permlevel": 0,

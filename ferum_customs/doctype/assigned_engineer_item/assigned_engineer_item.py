@@ -1,7 +1,7 @@
 # ferum_customs/ferum_customs/doctype/assigned_engineer_item/assigned_engineer_item.py
 """
-Python-контроллер для дочернего DocType "AssignedEngineerItem".
-Этот DocType, вероятно, используется как таблица в другом документе (например, ServiceObject).
+Python-контроллер для дочернего DocType "Assigned Engineer Item".
+Этот DocType используется как таблица в другом документе (например, Service Object).
 """
 from __future__ import annotations
 from typing import TYPE_CHECKING

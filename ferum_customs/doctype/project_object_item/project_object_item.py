@@ -1,7 +1,7 @@
 # ferum_customs/ferum_customs/doctype/project_object_item/project_object_item.py
 """
-Python-контроллер для дочернего DocType "ProjectObjectItem".
-Этот DocType, вероятно, используется как таблица в ServiceProject.
+Python-контроллер для дочернего DocType "Project Object Item".
+Этот DocType используется как таблица в Service Project.
 """
 from __future__ import annotations
 

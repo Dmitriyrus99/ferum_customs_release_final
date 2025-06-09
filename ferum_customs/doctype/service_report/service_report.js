@@ -1,4 +1,4 @@
-frappe.ui.form.on('service_report', {
+frappe.ui.form.on('Service Report', {
     refresh: function(frm) {
         if (frm.doc.docstatus === 1) {
             frm.add_custom_button(__('Создать счёт'), function() {

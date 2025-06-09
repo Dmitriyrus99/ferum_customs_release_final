@@ -1,6 +1,6 @@
 {
     "doctype": "DocType",
-    "name": "service_object",
+    "name": "Service Object",
     "module": "Ferum Customs",
     "engine": "InnoDB",
     "track_changes": 1,

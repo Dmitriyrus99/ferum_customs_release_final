@@ -1,6 +1,6 @@
 # ferum_customs/ferum_customs/doctype/service_report/service_report.py
 """
-Python-контроллер для DocType "ServiceReport".
+Python-контроллер для DocType "Service Report".
 """
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
