@@ -42,9 +42,9 @@ def validate(doc: "ServiceReport", method: str | None = None) -> None:
 
     if not frappe.db.exists("Service Request", doc.service_request):
         frappe.throw(
-            _("Связанная заявка на обслуживание (Service Request) '{0}' не найдена.").format(
-                doc.service_request
-            )
+            _(
+                "Связанная заявка на обслуживание (Service Request) '{0}' не найдена."
+            ).format(doc.service_request)
         )
 
     req_status = frappe.db.get_value("Service Request", doc.service_request, "status")
@@ -54,16 +54,16 @@ def validate(doc: "ServiceReport", method: str | None = None) -> None:
             f"Не удалось получить статус для заявки '{doc.service_request}', связанной с отчетом '{doc.name}'."
         )
         frappe.throw(
-            _("Не удалось получить статус для связанной заявки '{0}'. Обратитесь к администратору.").format(
-                doc.service_request
-            )
+            _(
+                "Не удалось получить статус для связанной заявки '{0}'. Обратитесь к администратору."
+            ).format(doc.service_request)
         )
 
     if req_status != STATUS_VYPOLNENA:
         frappe.throw(
-            _("Отчёт можно привязать только к заявке в статусе «{0}». Текущий статус заявки «{1}».").format(
-                STATUS_VYPOLNENA, req_status
-            )
+            _(
+                "Отчёт можно привязать только к заявке в статусе «{0}». Текущий статус заявки «{1}»."
+            ).format(STATUS_VYPOLNENA, req_status)
         )
 
 
