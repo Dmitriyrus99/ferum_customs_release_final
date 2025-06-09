@@ -30,6 +30,6 @@ A service request is created and progressed through a workflow. Once work is com
 
 ## Developer Guide
 1. Установите зависимости `pip install -r dev-requirements.txt`.
-2. Запустите `bash bootstrap.sh` для создания сайта `dev.localhost`.
+2. Запустите `bash dev_bootstrap.sh` для создания сайта `dev.localhost`.
 3. Запуск тестов и линтеров: `pre-commit run --all-files`.
 4. Для применения патчей выполните `bench --site dev.localhost migrate`.

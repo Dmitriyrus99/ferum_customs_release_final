@@ -30,8 +30,8 @@ sudo systemctl start redis
 
 ```bash
 # загрузите репозиторий
-git clone https://github.com/Dmitriyrus99/ferumdub.git
-cd ferumdub
+git clone https://github.com/Dmitriyrus99/ferum_customs.git
+cd ferum_customs
 
 # установка Python зависимостей
 ./install-dev.sh
@@ -130,7 +130,7 @@ export OPENAI_API_KEY="<ваш-ключ>"
 После настройки запустите `codex` в каталоге проекта. Подробности в [docs/CODEX_SETUP.md](docs/CODEX_SETUP.md).
 ## Поддержка
 
-Вопросы и предложения можно оставлять в [issue‑трекере](https://github.com/Dmitriyrus99/ferumdub/issues).
+Вопросы и предложения можно оставлять в [issue‑трекере](https://github.com/Dmitriyrus99/ferum_customs/issues).
 
 ---
 Дополнительные материалы доступны в [docs/OUTLINE.md](docs/OUTLINE.md).

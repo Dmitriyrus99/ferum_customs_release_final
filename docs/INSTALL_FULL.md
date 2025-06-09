@@ -56,8 +56,8 @@ pipx install frappe-bench
 ## 8. Клонирование проекта и установка зависимостей
 ```bash
 cd ~
-git clone https://github.com/ваш-проект/ferumdub.git
-cd ferumdub
+git clone https://github.com/ваш-проект/ferum_customs.git
+cd ferum_customs
 ./install-dev.sh
 ./dev_bootstrap.sh
 ```
