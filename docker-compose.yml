@@ -20,12 +20,17 @@ services:
       - mariadb
       - redis
     environment:
-      SITE_NAME: your-site-name
+      SITE_NAME: test_site
+      ADMIN_PWD: admin
+      DB_ROOT_PWD: ""
       DB_ROOT_USER: root
       MYSQL_ROOT_PASSWORD: root
       ADMIN_PASSWORD: admin
       INSTALL_APPS: erpnext,ferum_customs
+    volumes:
+      - sites_volume:/home/frappe/frappe-bench/sites
 
 volumes:
   mariadb:
   redis:
+  sites_volume:
