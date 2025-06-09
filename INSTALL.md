@@ -12,8 +12,8 @@
 
 Bash
 
-git clone https://github.com/Dmitriyrus99/ferumdub.git
-cd ferumdub
+git clone https://github.com/Dmitriyrus99/ferum_customs.git
+cd ferum_customs
 Запустите главный скрипт установки:
 Скрипт должен выполняться от пользователя с правами sudo.
 

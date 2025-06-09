@@ -2,12 +2,12 @@
 
 1. **Склонировать репозиторий**
    ```bash
-   git clone https://github.com/Dmitriyrus99/ferumdub.git
-   cd ferumdub
+   git clone https://github.com/Dmitriyrus99/ferum_customs.git
+   cd ferum_customs
    ```
-2. **Инициализировать окружение** – запустить `bootstrap.sh`, который установит Bench и создаст сайт `dev.localhost`.
+2. **Инициализировать окружение** – запустить `dev_bootstrap.sh`, который установит Bench и создаст сайт `dev.localhost`.
    ```bash
-   bash bootstrap.sh
+   bash dev_bootstrap.sh
    ```
 3. **Запустить сервер**
    ```bash

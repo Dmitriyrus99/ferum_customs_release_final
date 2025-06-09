@@ -3,7 +3,7 @@ set -e
 
 APP_NAME="ferum_customs"
 SITE_NAME="${SITE_NAME:-dev.localhost}"
-APP_PATH="/workspace/ferumdub"
+APP_PATH="$(cd "$(dirname "$0")" && pwd)"
 FRAPPE_BRANCH="${FRAPPE_BRANCH:-version-15}"
 
 # Initialize bench if folder does not exist
