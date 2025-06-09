@@ -47,9 +47,15 @@ def validate(doc: "ServiceRequest", method: str | None = None) -> None:
         if customer:
             doc.custom_customer = customer
         else:
-            frappe.throw(_("У выбранного проекта ({0}) отсутствует связанный клиент.").format(doc.get(FIELD_CUSTOM_PROJECT)))
+            frappe.throw(
+                _("У выбранного проекта ({0}) отсутствует связанный клиент.").format(
+                    doc.get(FIELD_CUSTOM_PROJECT)
+                )
+            )
 
-    if not doc.get(FIELD_CUSTOM_CUSTOMER) and doc.get(FIELD_CUSTOM_SERVICE_OBJECT_LINK):
+    if not doc.get(FIELD_CUSTOM_CUSTOMER) and doc.get(
+        FIELD_CUSTOM_SERVICE_OBJECT_LINK
+    ):
         customer = frappe.db.get_value(
             "Service Object", doc.get(FIELD_CUSTOM_SERVICE_OBJECT_LINK), "customer"
         )
@@ -63,9 +69,13 @@ def on_update_after_submit(doc: "ServiceRequest", method: str | None = None) -> 
         _notify_project_manager(doc)
 
 
-def prevent_deletion_with_links(doc: "ServiceRequest", method: str | None = None) -> None:
+def prevent_deletion_with_links(
+    doc: "ServiceRequest", method: str | None = None
+) -> None:
     """Запрещает удаление заявки, если на нее есть ссылки."""
-    if linked_report := frappe.db.exists("Service Report", {"service_request": doc.name}):
+    if linked_report := frappe.db.exists(
+        "Service Report", {"service_request": doc.name}
+    ):
         frappe.throw(
             _("Нельзя удалить заявку {0}, так как на нее ссылается отчет {1}.").format(
                 doc.name, linked_report
@@ -87,9 +97,17 @@ def get_engineers_for_object(service_object_name: str) -> List[str]:
     try:
         so_doc: "FrappeDocument" = frappe.get_doc("Service Object", service_object_name)
         engineers_table = so_doc.get("assigned_engineers") or []
-        return list({entry.get("engineer") for entry in engineers_table if entry.get("engineer")})
+        return list(
+            {
+                entry.get("engineer")
+                for entry in engineers_table
+                if entry.get("engineer")
+            }
+        )
     except frappe.DoesNotExistError:
-        frappe.logger(__name__).info(f"Объект '{service_object_name}' не найден при поиске инженеров.")
+        frappe.logger(__name__).info(
+            f"Объект '{service_object_name}' не найден при поиске инженеров."
+        )
         return []
     except Exception as e:
         frappe.logger(__name__).error(
