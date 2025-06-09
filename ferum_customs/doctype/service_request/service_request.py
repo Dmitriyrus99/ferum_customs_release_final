@@ -4,7 +4,6 @@ Python-контроллер для DocType "Service Request".
 """
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
 import frappe
@@ -63,7 +62,9 @@ class ServiceRequest(Document):
             if start_val and end_val:
                 if get_datetime(start_val) > get_datetime(end_val):
                     frappe.throw(
-                        _("{0} период: дата начала не может быть позже даты окончания.").format(label)
+                        _(
+                            "{0} период: дата начала не может быть позже даты окончания."
+                        ).format(label)
                     )
 
     def _calculate_duration(self) -> None:
@@ -87,7 +88,9 @@ class ServiceRequest(Document):
         """Автозаполнение проекта из связанного объекта обслуживания."""
         if self.custom_service_object_link and not self.custom_project:
             project = frappe.db.get_value(
-                "Service Object", self.custom_service_object_link, "linked_service_project"
+                "Service Object",
+                self.custom_service_object_link,
+                "linked_service_project",
             )
             if project:
                 self.custom_project = project
