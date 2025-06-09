@@ -1,39 +1,19 @@
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          pip install -r dev-requirements.txt
-          pip install pre-commit
-          pip install frappe-bench
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Start bench stack
-        run: docker compose -f docker-compose.yml up -d --build
-      - name: Wait for Frappe site
-        run: |
-          for i in {1..120}; do
-            if curl -sSf http://localhost:8000/api/method/ping >/dev/null; then
-              echo "Frappe site is up"
-              break
-            fi
-            sleep 5
-          done
+
+      - name: Build & start stack
+        run: docker compose -f docker-compose.yml up -d --build --wait --wait-timeout 600
+
       - name: Run pre-commit
-        run: SKIP=pytest pre-commit run --all-files --show-diff-on-failure
-      - name: Run tests
-        run: docker compose exec frappe pytest
-      - name: Stop bench stack
+        run: pre-commit run --all-files --show-diff-on-failure
+
+      - name: Run tests (inside backend)
+        run: docker compose exec -T backend pytest  # -T: без TTY
+
+      - name: Stop stack
         if: always()
-        run: docker compose -f docker-compose.yml down -v
+        run: docker compose down -v
+
