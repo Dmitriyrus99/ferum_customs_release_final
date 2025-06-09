@@ -139,6 +139,3 @@ jobs:
       - name: Stop Frappe Stack
         if: always() # Выполняется всегда
         run: docker compose down -v
-
-        if: always()
-        run: docker compose down -v
