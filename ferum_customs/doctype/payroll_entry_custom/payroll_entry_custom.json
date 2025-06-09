@@ -1,6 +1,6 @@
 {
     "doctype": "DocType",
-    "name": "payroll_entry_custom",
+    "name": "Payroll Entry Custom",
     "module": "Ferum Customs",
     "fields": [
         {

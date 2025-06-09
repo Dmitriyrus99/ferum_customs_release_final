@@ -1,6 +1,6 @@
 {
   "doctype": "DocType",
-  "name": "service_request",
+  "name": "Service Request",
   "module": "Ferum Customs",
   "engine": "InnoDB",
   "issingle": 0,

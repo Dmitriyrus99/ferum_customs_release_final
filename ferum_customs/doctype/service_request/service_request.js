@@ -1,10 +1,10 @@
 // ferum_customs/ferum_customs/doctype/service_request/service_request.js
 /**
- * Клиентский скрипт для DocType "service_request".
+ * Клиентский скрипт для DocType "Service Request".
  * Содержит общую логику фильтрации инженеров и специфичные действия формы.
  */
 
-frappe.ui.form.on('service_request', {
+frappe.ui.form.on('Service Request', {
     onload: function(frm) {
         // console.log("service_request DocType-specific JS: Form loaded:", frm.docname);
     },
@@ -86,7 +86,7 @@ frappe.ui.form.on('service_request', {
 
         if (frm.doc.docstatus === 1 && frm.doc.status === 'Выполнена') {
             frappe.db && frm.add_custom_button(__('Создать Акт выполненных работ'), function() {
-                frappe.new_doc('ServiceReport', {
+                frappe.new_doc('Service Report', {
                     service_request: frm.doc.name,
                     customer: frm.doc.custom_customer
                 });

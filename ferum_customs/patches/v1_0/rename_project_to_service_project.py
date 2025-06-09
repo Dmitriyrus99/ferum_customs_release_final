@@ -4,20 +4,20 @@ from frappe.model.rename_doc import rename_doc
 
 
 def execute():
-    """Renames DocType 'Project' to 'ServiceProject' if it exists and 'ServiceProject' doesn't."""
+    """Renames DocType 'Project' to 'Service Project' if needed."""
     if frappe.db.exists("DocType", "Project") and not frappe.db.exists(
-        "DocType", "ServiceProject"
+        "DocType", "Service Project"
     ):
-        frappe.print("Renaming DocType 'Project' to 'ServiceProject'...")
+        frappe.print("Renaming DocType 'Project' to 'Service Project'...")
         try:
             rename_doc(
                 "DocType",
                 "Project",
-                "ServiceProject",
+                "Service Project",
                 force=True,
                 ignore_permissions=True,
             )
-            frappe.print("Successfully renamed 'Project' to 'ServiceProject'.")
+            frappe.print("Successfully renamed 'Project' to 'Service Project'.")
         except Exception as e:
             frappe.log_error(
                 f"Error renaming DocType Project to ServiceProject: {e}", "Patch Error"

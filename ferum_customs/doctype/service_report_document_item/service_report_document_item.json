@@ -1,6 +1,6 @@
 {
     "doctype": "DocType",
-    "name": "service_report_document_item",
+    "name": "Service Report Document Item",
     "module": "Ferum Customs",
     "istable": 1,
     "fields": [

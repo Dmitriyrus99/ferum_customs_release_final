@@ -1,6 +1,6 @@
 # ferum_customs/ferum_customs/doctype/custom_attachment/custom_attachment.py
 """
-Python-контроллер для DocType "CustomAttachment".
+Python-контроллер для DocType "Custom Attachment".
 """
 from __future__ import annotations
 
@@ -58,9 +58,9 @@ class CustomAttachment(Document):
         и что эти ссылки указывают на существующие документы.
         """
         parent_fields_map = {
-            "parent_reference_sr": "service_request",
-            "parent_reference_srep": "ServiceReport",
-            "parent_reference_so": "ServiceObject",
+            "parent_reference_sr": "Service Request",
+            "parent_reference_srep": "Service Report",
+            "parent_reference_so": "Service Object",
         }
 
         linked_parents_count = 0

@@ -1,6 +1,6 @@
 # ferum_customs/ferum_customs/doctype/payroll_entry_custom/payroll_entry_custom.py
 """
-Python-контроллер для DocType "PayrollEntryCustom".
+Python-контроллер для DocType "Payroll Entry Custom".
 """
 from __future__ import annotations
 

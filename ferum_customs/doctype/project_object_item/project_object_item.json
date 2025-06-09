@@ -1,6 +1,6 @@
 {
     "doctype": "DocType",
-    "name": "project_object_item",
+    "name": "Project Object Item",
     "module": "Ferum Customs",
     "istable": 1,
     "fields": [
@@ -8,7 +8,7 @@
             "fieldname": "service_object",
             "label": "Service Object",
             "fieldtype": "Link",
-            "options": "ServiceObject"
+            "options": "Service Object"
         },
         {
             "fieldname": "description",
