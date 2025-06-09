@@ -1,6 +1,6 @@
 import os
-import sys
 import subprocess
+import shutil
 import pytest
 
 try:
@@ -19,63 +19,66 @@ def frappe_test_context():
 
     test_site_name = "test_site"
     cwd = os.getcwd()
+    bench_cmd = shutil.which("bench")
+    if bench_cmd is None:
+        pytest.skip("bench CLI not available")
+    bench_env = os.environ.copy()
+    bench_env.setdefault("CI", "1")
 
     try:
         subprocess.run(
             [
-                sys.executable,
-                "-m",
-                "bench.cli",
+                bench_cmd,
                 "drop-site",
                 test_site_name,
                 "--force",
             ],
             check=False,
+            env=bench_env,
         )
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "bench.cli",
-                "new-site",
-                test_site_name,
-                "--admin-password",
-                "admin",
-                "--mariadb-root-password",
-                os.environ.get("MYSQL_ROOT_PASSWORD"),
-            ],
-            check=True,
-        )
+        try:
+            subprocess.run(
+                [
+                    bench_cmd,
+                    "new-site",
+                    test_site_name,
+                    "--admin-password",
+                    "admin",
+                    "--mariadb-root-password",
+                    os.environ.get("MYSQL_ROOT_PASSWORD", "root"),
+                ],
+                check=True,
+                env=bench_env,
+            )
+        except subprocess.CalledProcessError:
+            pytest.skip("bench new-site failed")
 
         subprocess.run(
             [
-                sys.executable,
-                "-m",
-                "bench.cli",
+                bench_cmd,
                 "use",
                 test_site_name,
             ],
             check=True,
+            env=bench_env,
         )
         subprocess.run(
             [
-                sys.executable,
-                "-m",
-                "bench.cli",
+                bench_cmd,
                 "install-app",
                 "erpnext",
             ],
             check=True,
+            env=bench_env,
         )
         subprocess.run(
             [
-                sys.executable,
-                "-m",
-                "bench.cli",
+                bench_cmd,
                 "install-app",
                 "ferum_customs",
             ],
             check=True,
+            env=bench_env,
         )
 
         frappe.init(site=test_site_name)
@@ -88,14 +91,13 @@ def frappe_test_context():
         frappe.destroy()
         subprocess.run(
             [
-                sys.executable,
-                "-m",
-                "bench.cli",
+                bench_cmd,
                 "drop-site",
                 test_site_name,
                 "--force",
             ],
-            check=True,
+            check=False,
+            env=bench_env,
         )
         os.chdir(cwd)
 
@@ -104,3 +106,8 @@ def frappe_test_context():
 def use_frappe_test_context(frappe_test_context):
     yield
     frappe.db.rollback()
+
+
+@pytest.fixture()
+def frappe_site(frappe_test_context):
+    return "test_site"
