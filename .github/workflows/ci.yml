@@ -1,41 +1,98 @@
-name: CI
+# .github/workflows/ci.yml
+
+name: CI/CD Pipeline
 
 on:
+  # Запускать при push в ветку main
   push:
     branches: [main]
+  # А также при создании Pull Request в main
   pull_request:
+    branches: [main]
 
 jobs:
+  # --- ЗАДАНИЕ 1: ПРОВЕРКА КАЧЕСТВА КОДА (ЛИНТИНГ) ---
+  # Это задание выполняется быстро и не требует Docker.
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      # 1. Клонируем репозиторий
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Настраиваем Python нужной версии
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          pip install ruff black mypy types-requests pre-commit
+
+      # 3. Устанавливаем зависимости для линтинга
+      - name: Install linting dependencies
+        run: pip install black ruff mypy pre-commit types-requests
+
+      # 4. Запускаем pre-commit для всех статических проверок, кроме pytest
       - name: Run linters and formatters
         run: pre-commit run --all-files --show-diff-on-failure --exclude pytest
 
+  # --- ЗАДАНИЕ 2: ИНТЕГРАЦИОННОЕ ТЕСТИРОВАНИЕ ---
+  # Это задание зависит от успешного выполнения 'lint' и использует Docker.
   tests:
     runs-on: ubuntu-latest
-    needs: lint # Запускать тесты только после успешного линтинга
+    needs: lint # Запускать только после успешного линтинга
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Start bench stack
+      # 1. Клонируем репозиторий
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Запускаем Docker-контейнеры в фоновом режиме
+      # Скрипты entrypoint.sh и bootstrap.sh внутри контейнера начнут установку сайта.
+      - name: Start Frappe Stack via Docker Compose
         run: docker compose -f docker-compose.yml up -d --build
-      - name: Wait for site setup
+
+      # 3. Ожидаем готовности сайта Frappe
+      # Этот шаг опрашивает API сайта, пока не получит ответ 200 OK.
+      # Это надежнее, чем фиксированная задержка (sleep).
+      - name: Wait for Frappe site to be ready
         run: |
-          echo "Waiting for site to be ready..."
-          # Простой способ дождаться готовности - использовать таймаут.
-          # В реальном проекте лучше использовать скрипт, проверяющий доступность сайта.
-          sleep 180
-      - name: Run tests inside container
-        run: |
-          # Выполняем тесты внутри контейнера, где сайт уже создан
-          docker compose exec -T frappe bench --site dev.localhost run-tests --app ferum_customs
-      - name: Stop bench stack
+          echo "Waiting for Frappe site to become available..."
+          timeout=300 # Таймаут 5 минут
+          start_time=$(date +%s)
+          SITE_HOST="http://localhost:8000"
+
+          while true; do
+            # Проверяем, не истек ли таймаут
+            current_time=$(date +%s)
+            elapsed=$((current_time - start_time))
+            if [ $elapsed -ge $timeout ]; then
+              echo "Timeout: Site did not become ready in ${timeout} seconds."
+              # В случае ошибки выводим логи контейнера для отладки
+              docker compose logs frappe
+              exit 1
+            fi
+            
+            # Отправляем запрос к эндпоинту ping
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" $SITE_HOST/api/method/ping || echo "000")
+            
+            if [ "$status_code" -eq 200 ]; then
+              echo "Site is ready! Status code: $status_code."
+              break
+            else
+              echo "Site not ready yet (status: $status_code). Retrying in 15 seconds..."
+              sleep 15
+            fi
+          done
+
+      # 4. Запускаем тесты pytest внутри готового контейнера
+      # Имя сайта 'your-site-name' берется из docker-compose.yml.
+      - name: Run Pytest inside container
+        run: docker compose exec -T frappe bench --site your-site-name run-tests --app ferum_customs
+
+      # 5. Останавливаем Docker и выводим логи
+      # Этот шаг выполняется всегда, даже если тесты упали, для очистки ресурсов.
+      - name: Stop Frappe Stack and dump logs
         if: always()
-        run: docker compose -f docker-compose.yml down -v
+        run: |
+          echo "Dumping logs for debugging..."
+          docker compose logs frappe
+          docker compose down -v
