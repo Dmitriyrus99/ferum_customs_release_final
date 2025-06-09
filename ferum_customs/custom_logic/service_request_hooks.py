@@ -53,9 +53,7 @@ def validate(doc: "ServiceRequest", method: str | None = None) -> None:
                 )
             )
 
-    if not doc.get(FIELD_CUSTOM_CUSTOMER) and doc.get(
-        FIELD_CUSTOM_SERVICE_OBJECT_LINK
-    ):
+    if not doc.get(FIELD_CUSTOM_CUSTOMER) and doc.get(FIELD_CUSTOM_SERVICE_OBJECT_LINK):
         customer = frappe.db.get_value(
             "Service Object", doc.get(FIELD_CUSTOM_SERVICE_OBJECT_LINK), "customer"
         )
@@ -98,11 +96,7 @@ def get_engineers_for_object(service_object_name: str) -> List[str]:
         so_doc: "FrappeDocument" = frappe.get_doc("Service Object", service_object_name)
         engineers_table = so_doc.get("assigned_engineers") or []
         return list(
-            {
-                entry.get("engineer")
-                for entry in engineers_table
-                if entry.get("engineer")
-            }
+            {entry.get("engineer") for entry in engineers_table if entry.get("engineer")}
         )
     except frappe.DoesNotExistError:
         frappe.logger(__name__).info(
@@ -134,7 +128,9 @@ def _notify_project_manager(doc: "ServiceRequest") -> None:
 
         if not recipients:
             frappe.logger(__name__).warning(
-                f"Получатели с ролью '{ROLE_PROEKTNYJ_MENEDZHER}' не найдены для уведомления о закрытии заявки '{doc.name}'."
+                _("Получатели с ролью '{0}' не найдены для уведомления.").format(
+                    ROLE_PROEKTNYJ_MENEDZHER
+                )
             )
             return
 
